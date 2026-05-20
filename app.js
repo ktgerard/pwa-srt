@@ -232,15 +232,7 @@ function render(){
   const tbody=$('resultsTable').querySelector('tbody'); tbody.innerHTML='';
   const intent = {weight:$('weightIntent').value, flex:$('flexIntent').value, torque:$('torqueIntent').value, launch:$('launchIntent').value, spin:$('spinIntent').value};
   $('warnings').innerHTML = warning ? `<div class="warning">${warning}</div>` : '';
-  $('resultMeta').textContent = rows.length ? `Showing top ${rows.length} grouped production recommendations from ${shafts.length.toLocaleString()} shaft rows (${(DATA.metadata?.fujikuraRows||0).toLocaleString()} Fujikura).` : 'No scored recommendations for this scenario.';
-  rows.forEach((r,i)=>{
-    const s=r.s;
-    const tr=document.createElement('tr');
-    const source=firstNonBlank(s.PrimaryRetailURL,s.SecondaryRetailURL);
-    const price=retailPrice(s);
-    tr.innerHTML=`<td class="rank">${i+1}</td><td>${s.OEM}</td><td class="model-cell"><b>${displayName(s)}</b><span>${canonicalId(s)}</span></td><td>${num(s.Weight_g)}g<br><span class="muted">${s.WeightClass}</span></td><td>${s.Flex}</td><td>${cleanTip(s.TipSize)}</td><td class="score">${r.prod.toFixed(1)}${price?`<br><span class="muted">$${price}</span>`:''}</td><td class="availability">${text(s.AvailabilityText)||'—'}</td><td class="fit">${fitSummary(s,intent)}<br><span class="muted">Tq ${text(s.Torque)||'—'} / Launch ${s.LaunchNum||'—'} / Spin ${s.SpinNum||'—'}</span></td><td>${source?`<a class="source-link" href="${source}" target="_blank" rel="noopener">Open</a>`:'—'}</td>`;
-    tbody.appendChild(tr);
-  });
+  $('resultMeta').textContent = rows.length ? `Showing top ${rows.length} grouped production recommendations from ${shafts.length.toLocaleString()} shaft rows.;
 }
 function init(){
   ['weightIntent','flexIntent','torqueIntent','launchIntent','spinIntent'].forEach(id=>fillSelect(id,intents,defaults[id]||'Same'));
