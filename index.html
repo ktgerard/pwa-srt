@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>FIS Shaft Recommendation Tool</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css?v=8.1-layout-v3" />
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <div class="eyebrow">FIS Proof of Concept</div>
+      <h1>Shaft Recommendation Tool</h1>
+    </div>
+    <button id="installBtn" class="ghost hidden">Install</button>
+  </header>
+
+  <main class="layout layout-v3">
+    <section class="panel input-panel selector-workflow selector-workflow-v3">
+      <div class="section-title"><span>1</span> Current Shaft</div>
+      <div class="grid two">
+        <label>Club Type<select id="shaftType"></select></label>
+        <label>Brand<select id="shaftBrand"></select></label>
+        <label>Series<select id="shaftSeries"></select></label>
+        <label>Model<select id="shaftModel"></select></label>
+        <label>Weight Class<select id="shaftWeightClass"></select></label>
+        <label>Flex<select id="shaftFlex"></select></label>
+        <label>Tip<select id="shaftTip"></select></label>
+      </div>
+      <div id="selectedShaftCard" class="detail-card"></div>
+
+      <div class="section-title"><span>2</span> Head / Build Context</div>
+      <div class="grid two">
+        <label>Club Type<select id="headType"></select></label>
+        <label>Brand<select id="headBrand"></select></label>
+        <label>Model<select id="headModel"></select></label>
+        <label>Variant<select id="headVariant"></select></label>
+        <label>Year<select id="headYear"></select></label>
+        <label>Hosel Size<input id="hoselSize" inputmode="decimal" /></label>
+      </div>
+      <div id="selectedHeadCard" class="detail-card"></div>
+
+      <div class="section-title"><span>3</span> Match Intent</div>
+      <div class="intent-grid">
+        <label>Weight<select id="weightIntent"></select></label>
+        <label>Flex<select id="flexIntent"></select></label>
+        <label>Torque<select id="torqueIntent"></select></label>
+        <label>Launch<select id="launchIntent"></select></label>
+        <label>Spin<select id="spinIntent"></select></label>
+      </div>
+      <div class="actions">
+        <button id="runBtn">Recommend Shafts</button>
+        <button id="resetBtn" class="secondary">Reset Demo</button>
+      </div>
+    </section>
+
+    <section class="panel results-panel recommendation-panel">
+      <div class="results-header">
+        <div>
+          <div class="section-title no-margin"><span>4</span> Replacement Shaft Recommendations</div>
+          <p id="resultMeta" class="muted"></p>
+        </div>
+        <div class="filters">
+          <label class="check"><input id="currentOnly" type="checkbox" checked /> Current/active only</label>
+          <label class="check"><input id="availableBoost" type="checkbox" checked /> Availability boost</label>
+        </div>
+      </div>
+      <div id="warnings" class="warnings"></div>
+      <div class="table-wrap">
+        <table id="resultsTable">
+          <thead>
+            <tr>
+              <th>Rank</th><th>Brand</th><th>Model</th><th>Weight</th><th>Flex</th><th>Tip</th><th>Score</th><th>Availability</th><th>Fit Summary</th><th>Source</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Static PWA prototype generated from Golf_Shaft_Tool_v8.1.xlsm. Scoring mirrors the current MatchEngine concept, with grouped production ranking and torque text/range normalization.
+  </footer>
+
+  <script src="data.js?v=8.1-layout-v3"></script>
+  <script src="app.js?v=8.1-layout-v3"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js'));
+}
+</script>
+</body>
+</html>
