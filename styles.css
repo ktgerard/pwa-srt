@@ -9,7 +9,6 @@
   padding:18px clamp(12px,3vw,28px);
 }
 .selector-workflow{
-  position:sticky;
   top:82px;
   z-index:5;
 }
@@ -99,7 +98,6 @@
 }
 
 .selector-workflow-v3{
-  position:sticky;
   top:82px;
   z-index:20;
   overflow:visible;
