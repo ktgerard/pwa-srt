@@ -232,7 +232,7 @@ function render(){
   const tbody=$('resultsTable').querySelector('tbody'); tbody.innerHTML='';
   const intent = {weight:$('weightIntent').value, flex:$('flexIntent').value, torque:$('torqueIntent').value, launch:$('launchIntent').value, spin:$('spinIntent').value};
   $('warnings').innerHTML = warning ? `<div class="warning">${warning}</div>` : '';
-  $('resultMeta').textContent = rows.length ? `Showing top ${rows.length} grouped production recommendations from ${shafts.length.toLocaleString()} shaft rows (${(DATA.metadata?.fujikuraRows||0).toLocaleString()} Fujikura).` : 'No scored recommendations for this scenario.';
+  $('resultMeta').textContent = rows.length ? `Showing top ${rows.length} grouped production recommendations from ${shafts.length.toLocaleString()} shaft rows.` : 'No scored recommendations for this scenario.';
   rows.forEach((r,i)=>{
     const s=r.s;
     const tr=document.createElement('tr');
