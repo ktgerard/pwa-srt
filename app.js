@@ -245,7 +245,17 @@ function render(){
 function init(){
   ['weightIntent','flexIntent','torqueIntent','launchIntent','spinIntent'].forEach(id=>fillSelect(id,intents,defaults[id]||'Same'));
   cascadeShaft(); cascadeHead(); useDefaults = false; render();
-  ['shaftType','shaftBrand','shaftSeries','shaftModel','shaftWeightClass','shaftFlex','shaftTip'].forEach(id=>$(id).addEventListener('change',()=>{defaults[id.replace('shaft','').toLowerCase()] = $(id).value; cascadeShaft(); render();}));
+  ['shaftType','shaftBrand','shaftSeries','shaftModel','shaftWeightClass','shaftFlex','shaftTip'].forEach(id=>$(id).addEventListener('change',()=>{
+  defaults[id.replace('shaft','').toLowerCase()] = $(id).value;
+
+  if(id === 'shaftType'){
+    $('headType').value = $('shaftType').value;
+    cascadeHead();
+  }
+
+  cascadeShaft();
+  render();
+}));
   ['headType','headBrand','headModel','headVariant','headYear'].forEach(id=>$(id).addEventListener('change',()=>{cascadeHead(); cascadeShaft(); render();}));
   ['weightIntent','flexIntent','torqueIntent','launchIntent','spinIntent','hoselSize','currentOnly','availableBoost'].forEach(id=>$(id).addEventListener('change',render));
   $('runBtn').addEventListener('click',render);
