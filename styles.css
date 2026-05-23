@@ -214,6 +214,22 @@
     grid-template-columns:repeat(5,minmax(110px,1fr));
   }
 }
+@media (max-width:1120px){
+  .selector-workflow .grid.two{
+    grid-template-columns:
+      110px
+      140px
+      160px
+      180px
+      90px
+      70px
+      80px;
+    gap:8px;
+  }
+  .selector-workflow .intent-grid{
+    grid-template-columns:repeat(5,minmax(110px,1fr));
+  }
+}
 /* iPad portrait / smaller tablets: 2-column selector bands, details remain high on page. */
 @media (max-width:820px){
   .selector-workflow-v3{
