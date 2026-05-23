@@ -127,8 +127,15 @@
 /* Shaft selector band: 7 controls on desktop, wraps to 2 rows naturally. */
 .selector-workflow-v3 .grid.two{
   display:grid;
-  grid-template-columns:repeat(7,minmax(122px,1fr));
-  gap:10px;
+  grid-template-columns:
+      110px
+      140px
+      160px
+      180px
+      90px
+      70px
+      80px;
+    gap:8px;
   align-items:end;
 }
 
