@@ -200,7 +200,15 @@
 /* iPad landscape / 12.9-ish: keep workflow sticky, reduce chrome, preserve 1-row intent. */
 @media (max-width:1280px){
   .selector-workflow .grid.two{
-    grid-template-columns:repeat(4,minmax(145px,1fr));
+    grid-template-columns:
+      110px
+      140px
+      160px
+      180px
+      90px
+      70px
+      80px;
+    gap:8px;
   }
   .selector-workflow .intent-grid{
     grid-template-columns:repeat(5,minmax(110px,1fr));
