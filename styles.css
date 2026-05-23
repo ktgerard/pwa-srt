@@ -190,7 +190,16 @@
 /* Large tablets / smaller laptops: shaft/head controls in 2 rows. */
 @media (max-width:1380px){
   .selector-workflow-v3 .grid.two{
-    grid-template-columns:repeat(4,minmax(142px,1fr));
+    /*grid-template-columns:repeat(4,minmax(142px,1fr));*/
+    grid-template-columns:
+      110px
+      140px
+      160px
+      180px
+      90px
+      70px
+      80px;
+    gap:8px;
   }
   .selector-workflow-v3 .intent-grid{
     grid-template-columns:repeat(5,minmax(104px,1fr));
