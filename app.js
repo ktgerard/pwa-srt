@@ -12,6 +12,15 @@ const truthy = v => ['1','y','yes','true'].includes(norm(v)) || v === true || v 
 const tipNum = v => { const n = num(v); return n > 1 ? n/1000 : n; };
 const flexNum = v => num(v);
 const cleanTip = v => { const n = tipNum(v); return n ? n.toFixed(3).replace(/^0/,'0') : ''; };
+const CLUB_TYPE_ORDER = {
+  Driver: 1,
+  Fairway: 2,
+  Hybrid: 3,
+  Iron: 4,
+  Wedge: 5,
+  Wood: 2,
+  Woods: 2
+};
 
 function parseTorque(v){
   const raw = text(v).replace(/[–—]/g,'-').replace(/\bto\b/ig,'-');
@@ -192,7 +201,16 @@ function fillSelect(id, values, preferred){
 let useDefaults = true;
 function pref(key){ return useDefaults ? defaults[key] : undefined; }
 function cascadeShaft(){
-  fillSelect('shaftType', uniq(shafts.map(s=>s.ClubType)), pref('shaftType'));
+  fillSelect(
+  'shaftType',
+  uniq(shafts.map(s=>s.ClubType))
+    .sort((a,b)=>
+      (CLUB_TYPE_ORDER[a] ?? 999) -
+      (CLUB_TYPE_ORDER[b] ?? 999)
+    ),
+  pref('shaftType')
+);
+/*  fillSelect('shaftType', uniq(shafts.map(s=>s.ClubType)), pref('shaftType')); */
   let pool=shafts.filter(s=>s.ClubType===$('shaftType').value);
   fillSelect('shaftBrand', uniq(pool.map(s=>s.OEM)), pref('brand'));
   pool=pool.filter(s=>s.OEM===$('shaftBrand').value);
