@@ -127,15 +127,8 @@
 /* Shaft selector band: 7 controls on desktop, wraps to 2 rows naturally. */
 .selector-workflow-v3 .grid.two{
   display:grid;
-  grid-template-columns:
-      110px
-      140px
-      160px
-      180px
-      90px
-      70px
-      80px;
-    gap:8px;
+  grid-template-columns:repeat(7,minmax(122px,1fr));
+  gap:10px;
   align-items:end;
 }
 
@@ -187,7 +180,7 @@
   min-width:1040px;
 }
 
-/* Large tablets / smaller laptops: shaft/head controls in 2 rows. */
+/* Large tablets (iPad Pro 12.9 Landscape) / smaller laptops: shaft/head controls in 2 rows. */
 @media (max-width:1380px){
   .selector-workflow-v3 .grid.two{
     /*grid-template-columns:repeat(4,minmax(142px,1fr));*/
@@ -206,17 +199,17 @@
   }
 }
 
-/* iPad landscape / 12.9-ish: keep workflow sticky, reduce chrome, preserve 1-row intent. */
+/* iPad landscape / 11-ish: reduce chrome, preserve 1-row intent. */
 @media (max-width:1280px){
   .selector-workflow .grid.two{
     grid-template-columns:
-      110px
-      140px
-      160px
+      180px
+      180px
+      180px
       180px
       90px
-      70px
-      80px;
+      90px
+      90px;
     gap:8px;
   }
   .selector-workflow .intent-grid{
