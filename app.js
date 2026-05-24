@@ -211,6 +211,7 @@ function cascadeShaft(){
   pref('shaftType')
 );
 /*  fillSelect('shaftType', uniq(shafts.map(s=>s.ClubType)), pref('shaftType')); */
+  const headHosel = cleanTip(selectedHead()?.HoselSizeDefault);
   let pool=shafts.filter(s=>s.ClubType===$('shaftType').value);
   fillSelect('shaftBrand', uniq(pool.map(s=>s.OEM)), pref('brand'));
   pool=pool.filter(s=>s.OEM===$('shaftBrand').value);
@@ -222,7 +223,6 @@ function cascadeShaft(){
   pool=pool.filter(s=>s.WeightClass===$('shaftWeightClass').value);
   fillSelect('shaftFlex', uniq(pool.map(s=>s.Flex)), pref('flex'));
   pool=pool.filter(s=>s.Flex===$('shaftFlex').value);
-  const headHosel = cleanTip(selectedHead()?.HoselSizeDefault);
   fillSelect('shaftTip', uniq(pool.map(s=>cleanTip(s.TipSize))), headHosel || pref('tip'));
   updateCards();
 }
