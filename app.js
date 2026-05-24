@@ -223,7 +223,8 @@ function cascadeShaft(){
   pool=pool.filter(s=>s.WeightClass===$('shaftWeightClass').value);
   fillSelect('shaftFlex', uniq(pool.map(s=>s.Flex)), pref('flex'));
   pool=pool.filter(s=>s.Flex===$('shaftFlex').value);
-  fillSelect('shaftTip', uniq(pool.map(s=>cleanTip(s.TipSize))), headHosel || pref('tip'));
+/*  fillSelect('shaftTip', uniq(pool.map(s=>cleanTip(s.TipSize))), headHosel || pref('tip')); */
+  fillSelect('shaftTip', uniq(pool.map(s=>cleanTip(s.TipSize))), pref('tip'));
   updateCards();
 }
 function cascadeHead(){
