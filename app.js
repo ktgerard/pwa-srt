@@ -222,7 +222,8 @@ function cascadeShaft(){
   fillSelect('shaftWeightClass', uniq(pool.map(s=>s.WeightClass)), pref('weightClass'));
   pool=pool.filter(s=>s.WeightClass===$('shaftWeightClass').value);
   fillSelect('shaftFlex', uniq(pool.map(s=>s.Flex)), pref('flex'));
-  pool=pool.filter(s=>s.Flex===$('shaftFlex').value);
+/*  pool=pool.filter(s=>s.Flex===$('shaftFlex').value);*/
+  pool=pool.filter(s=>text(s.Flex)===text($('shaftFlex').value));
 /*  fillSelect('shaftTip', uniq(pool.map(s=>cleanTip(s.TipSize))), headHosel || pref('tip')); */
   fillSelect('shaftTip', uniq(pool.map(s=>cleanTip(s.TipSize))), pref('tip'));
   updateCards();
