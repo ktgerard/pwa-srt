@@ -258,7 +258,7 @@ function render(){
     const tr=document.createElement('tr');
     const source=firstNonBlank(s.PrimaryRetailURL,s.SecondaryRetailURL);
     const price=retailPrice(s);
-    tr.innerHTML=`<td class="rank">${i+1}</td><td>${s.OEM}</td><td class="model-cell"><b>${displayName(s)}</b><span>${canonicalId(s)} / ${s.Material}</span></td><td>${num(s.Weight_g)}g<br><span class="muted">${s.WeightClass}</span></td><td>${s.Flex}</td><td>${cleanTip(s.TipSize)}</td><td class="score">${r.prod.toFixed(1)}${price?`<br><span class="muted">$${price}</span>`:''}</td><td class="availability">${text(s.AvailabilityText)||'—'}</td><td class="fit">${fitSummary(s,intent)}<br><span class="muted">Tq ${text(s.Torque)||'—'} / Launch ${s.LaunchNum||'—'} / Spin ${s.SpinNum||'—'}</span></td><td>${source?`<a class="source-link" href="${source}" target="_blank" rel="noopener">Open</a>`:'—'}</td>`;
+    tr.innerHTML=`<td class="rank">${i+1}</td><td>${s.OEM}</td><td class="model-cell"><b>${displayName(s)}</b><span>${canonicalId(s)} - ${s.Material}</span></td><td>${num(s.Weight_g)}g<br><span class="muted">${s.WeightClass}</span></td><td>${s.Flex}</td><td>${cleanTip(s.TipSize)}</td><td class="score">${r.prod.toFixed(1)}${price?`<br><span class="muted">$${price}</span>`:''}</td><td class="availability">${text(s.AvailabilityText)||'—'}</td><td class="fit">${fitSummary(s,intent)}<br><span class="muted">Tq ${text(s.Torque)||'—'} / Launch ${s.LaunchNum||'—'} / Spin ${s.SpinNum||'—'}</span></td><td>${source?`<a class="source-link" href="${source}" target="_blank" rel="noopener">Open</a>`:'—'}</td>`;
     tbody.appendChild(tr);
   });
 }
