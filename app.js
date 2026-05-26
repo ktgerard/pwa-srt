@@ -227,39 +227,48 @@ function fillSelect(id, values, preferred, includeAll=false){
   else if(allowed.length) el.value=allowed[0];
 }
 let useDefaults = true;
-function pref(key){ return useDefaults ? defaults[key] : undefined; }
+function pref(key){ return undefined; }
 function optValue(row, field){ return field.clean ? field.clean(row[field.prop]) : text(row[field.prop]); }
 function optionValues(rows, field){ return uniq(rows.map(r=>optValue(r, field))).sort(field.sort || undefined); }
 function rowMatches(row, field, value){ return value===ALL_VALUE || value==='' || optValue(row, field)===value; }
-function firstValidValue(values, preferred, allowAll){
-  if(values.includes(preferred)) return preferred;
-  if(allowAll && preferred===ALL_VALUE) return ALL_VALUE;
-  return values[0] ?? (allowAll ? ALL_VALUE : '');
-}
+
 function solveCascade(records, fields, changedId, defaultPrefs={}, preferredByField={}){
   const current = Object.fromEntries(fields.map(f=>[f.id, $(f.id).value || ALL_VALUE]));
-  const changedVal = changedId ? current[changedId] : '';
-  const hasConcrete = fields.some(f=>current[f.id] && current[f.id]!==ALL_VALUE);
-  const forceConcrete = hasConcrete || (changedId && changedVal!==ALL_VALUE) || useDefaults;
 
-  // Initial load may use workbook defaults; after that, concrete user choices drive discovery.
+  // Only concrete selector values are constraints. Selecting All removes that constraint.
   let constraints = {};
   fields.forEach(f=>{
-    const def = defaultPrefs[f.id];
-    const val = useDefaults && def ? def : current[f.id];
-    if(val && val!==ALL_VALUE) constraints[f.id]=val;
+    const v = current[f.id];
+    if(v && v !== ALL_VALUE) constraints[f.id] = v;
   });
 
-  let targetRows = records.filter(r=>fields.every(f=>!constraints[f.id] || rowMatches(r,f,constraints[f.id])));
-  if(!targetRows.length && changedId && changedVal && changedVal!==ALL_VALUE){
+  // On first load, start in discovery mode: every selector is All.
+  // Defaults are intentionally ignored for the cascading selectors.
+  const hasConcrete = Object.keys(constraints).length > 0;
+
+  let targetRows = hasConcrete
+    ? records.filter(r=>fields.every(f=>!constraints[f.id] || rowMatches(r,f,constraints[f.id])))
+    : [...records];
+
+  // If a newly selected value conflicts with other stale constraints, keep the newly changed
+  // field and rebuild the rest from that value. This is what makes picking Model=AXIOM 105
+  // backfill Iron / Fujikura / AXIOM instead of getting trapped by old selector state.
+  if(!targetRows.length && changedId && current[changedId] && current[changedId] !== ALL_VALUE){
     const cf = fields.find(f=>f.id===changedId);
-    targetRows = records.filter(r=>rowMatches(r,cf,changedVal));
-    constraints = {[changedId]: changedVal};
+    constraints = {[changedId]: current[changedId]};
+    targetRows = records.filter(r=>rowMatches(r, cf, current[changedId]));
   }
+
+  if(!hasConcrete && !Object.keys(constraints).length){
+    fields.forEach(f=>fillSelect(f.id, optionValues(records, f), ALL_VALUE, true));
+    return;
+  }
+
   if(!targetRows.length) targetRows = [...records];
 
-  // Pick a representative row so downstream selectors behave like the original cascade
-  // once any concrete value has been supplied.
+  // A representative row restores the pre-All behavior once the user supplies any concrete
+  // value: upstream single values backfill, downstream multi-value choices choose the first
+  // valid option instead of staying at All.
   const representative = targetRows[0] || records[0];
 
   fields.forEach(f=>{
@@ -270,15 +279,26 @@ function solveCascade(records, fields, changedId, defaultPrefs={}, preferredByFi
     }));
     if(!optionRows.length) optionRows = targetRows;
     const values = optionValues(optionRows, f);
+    const targetValues = optionValues(targetRows, f);
 
-    let preferred = preferredByField[f.id] || constraints[f.id] || (representative ? optValue(representative, f) : undefined);
-    if(useDefaults && defaultPrefs[f.id]) preferred = defaultPrefs[f.id];
-    if(!forceConcrete && !useDefaults) preferred = ALL_VALUE;
-    if(forceConcrete && f.id!==changedId && values.length===1) preferred = values[0];
-    if(forceConcrete && (!preferred || preferred===ALL_VALUE) && representative) preferred = optValue(representative, f);
+    let preferred;
 
-    fillSelect(f.id, values, firstValidValue(values, preferred, true), true);
-    if($(f.id).value && $(f.id).value!==ALL_VALUE) constraints[f.id] = $(f.id).value;
+    if(constraints[f.id] && values.includes(constraints[f.id])){
+      preferred = constraints[f.id];
+    } else if(preferredByField[f.id] && values.includes(preferredByField[f.id])){
+      preferred = preferredByField[f.id];
+    } else if(targetValues.length === 1){
+      preferred = targetValues[0];
+    } else if(representative){
+      preferred = optValue(representative, f);
+    } else {
+      preferred = values[0] ?? ALL_VALUE;
+    }
+
+    fillSelect(f.id, values, preferred, true);
+
+    const selected = $(f.id).value;
+    if(selected && selected !== ALL_VALUE) constraints[f.id] = selected;
     else delete constraints[f.id];
   });
 }
@@ -347,11 +367,11 @@ function render(){
 }
 function init(){
   ['weightIntent','flexIntent','torqueIntent','launchIntent','spinIntent'].forEach(id=>fillSelect(id,intents,defaults[id]||'Same'));
-  cascadeShaft(); cascadeHead(); useDefaults = false; render();
+  useDefaults = false; cascadeShaft(); cascadeHead(); render();
   ['shaftType','shaftBrand','shaftSeries','shaftModel','shaftWeightClass','shaftFlex','shaftTip'].forEach(id=>$(id).addEventListener('change',()=>{
     defaults[id.replace('shaft','').toLowerCase()] = $(id).value;
 
-    if(id === 'shaftType' && $('shaftType').value !== ALL_VALUE){
+    if(id === 'shaftType'){
       $('headType').value = $('shaftType').value;
       cascadeHead('headType');
     }
@@ -360,7 +380,7 @@ function init(){
     render();
   }));
   ['headType','headBrand','headModel','headVariant','headYear'].forEach(id=>$(id).addEventListener('change',()=>{
-    if(id === 'headType' && $('headType').value !== ALL_VALUE){
+    if(id === 'headType'){
       $('shaftType').value = $('headType').value;
       cascadeShaft('shaftType');
     }
@@ -371,7 +391,7 @@ function init(){
   ['weightIntent','flexIntent','torqueIntent','launchIntent','spinIntent','hoselSize','currentOnly','availableBoost'].forEach(id=>$(id).addEventListener('change',render));
   $('runBtn').addEventListener('click',render);
   $('resetBtn').addEventListener('click',()=>location.reload());
-  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=8.1-all-cascade-v2').catch(()=>{});
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=8.1-all-cascade-v3').catch(()=>{});
 }
 let deferredPrompt; window.addEventListener('beforeinstallprompt',e=>{e.preventDefault(); deferredPrompt=e; $('installBtn').classList.remove('hidden');});
 $('installBtn').addEventListener('click',async()=>{ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; $('installBtn').classList.add('hidden'); }});
