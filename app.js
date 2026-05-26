@@ -13,6 +13,8 @@ const truthy = v => ['1','y','yes','true'].includes(norm(v)) || v === true || v 
 const tipNum = v => { const n = num(v); return n > 1 ? n/1000 : n; };
 const flexNum = v => num(v);
 const cleanTip = v => { const n = tipNum(v); return n ? n.toFixed(3).replace(/^0/,'0') : ''; };
+const ALL_VALUE = '__ALL__';
+
 const CLUB_TYPE_ORDER = {
   Driver: 1,
   Fairway: 2,
@@ -134,7 +136,13 @@ function selectedShaft(){
   return selectedShaftCandidates()[0] || null;
 }
 function selectedHead(){
-  return heads.find(h => text(h.ClubType)===$('headType').value && text(h.OEM)===$('headBrand').value && text(h.Model)===$('headModel').value && text(h.Variant)===$('headVariant').value && text(h.ReleaseYear)===$('headYear').value) || null;
+  return heads.find(h =>
+    ($('headType').value===ALL_VALUE || text(h.ClubType)===$('headType').value) &&
+    ($('headBrand').value===ALL_VALUE || text(h.OEM)===$('headBrand').value) &&
+    ($('headModel').value===ALL_VALUE || text(h.Model)===$('headModel').value) &&
+    ($('headVariant').value===ALL_VALUE || text(h.Variant)===$('headVariant').value) &&
+    ($('headYear').value===ALL_VALUE || text(h.ReleaseYear)===$('headYear').value)
+  ) || null;
 }
 
 function scoreShaft(s, base, head, intent){
@@ -257,15 +265,54 @@ function cascadeShaft(preferredTip){
   updateCards();
 }
 function cascadeHead(){
-  fillSelect('headType', uniq(heads.map(h=>h.ClubType)), pref('headClubType'));
-  let pool=heads.filter(h=>h.ClubType===$('headType').value);
-  fillSelect('headBrand', uniq(pool.map(h=>h.OEM)), pref('headBrand'));
-  pool=pool.filter(h=>h.OEM===$('headBrand').value);
-  fillSelect('headModel', uniq(pool.map(h=>h.Model)), pref('headModel'));
-  pool=pool.filter(h=>h.Model===$('headModel').value);
-  fillSelect('headVariant', uniq(pool.map(h=>h.Variant)), pref('headVariant'));
-  pool=pool.filter(h=>h.Variant===$('headVariant').value);
-  fillSelect('headYear', uniq(pool.map(h=>h.ReleaseYear)), pref('headYear'));
+  let pool = [...heads];
+
+  fillSelect('headType',
+    uniq(heads.map(h=>h.ClubType)),
+    pref('headClubType'),
+    true
+  );
+
+  if($('headType').value !== ALL_VALUE){
+    pool = pool.filter(h=>h.ClubType === $('headType').value);
+  }
+
+  fillSelect('headBrand',
+    uniq(pool.map(h=>h.OEM)),
+    pref('headBrand'),
+    true
+  );
+
+  if($('headBrand').value !== ALL_VALUE){
+    pool = pool.filter(h=>h.OEM === $('headBrand').value);
+  }
+
+  fillSelect('headModel',
+    uniq(pool.map(h=>h.Model)),
+    pref('headModel'),
+    true
+  );
+
+  if($('headModel').value !== ALL_VALUE){
+    pool = pool.filter(h=>h.Model === $('headModel').value);
+  }
+
+  fillSelect('headVariant',
+    uniq(pool.map(h=>h.Variant)),
+    pref('headVariant'),
+    true
+  );
+
+  if($('headVariant').value !== ALL_VALUE){
+    pool = pool.filter(h=>h.Variant === $('headVariant').value);
+  }
+
+  fillSelect('headYear',
+    uniq(pool.map(h=>h.ReleaseYear)),
+    pref('headYear'),
+    true
+  );
+
   updateCards();
 }
 function updateCards(){
