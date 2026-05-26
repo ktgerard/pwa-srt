@@ -3,6 +3,7 @@ const shafts = DATA.shafts;
 const heads = DATA.heads;
 const defaults = DATA.dashboardDefaults;
 const intents = ['Same','Less','More'];
+const ALL = 'All';
 const $ = id => document.getElementById(id);
 const num = v => { const n = parseFloat(String(v ?? '').replace(/[^0-9.\-]/g,'')); return Number.isFinite(n) ? n : 0; };
 const text = v => String(v ?? '').trim();
@@ -103,8 +104,34 @@ function displayName(s){
 }
 function canonicalId(s){ return firstNonBlank(s.CanonicalShaftID, s.NEWShaftID, s.ShaftID); }
 
+const shaftFields = [
+  ['shaftType','ClubType', v => text(v)],
+  ['shaftBrand','OEM', v => text(v)],
+  ['shaftSeries','Series', v => text(v)],
+  ['shaftModel','Model', v => text(v)],
+  ['shaftWeightClass','WeightClass', v => text(v)],
+  ['shaftFlex','Flex', v => text(v)],
+  ['shaftTip','TipSize', v => cleanTip(v)]
+];
+function isAll(v){ return text(v) === ALL || text(v) === ''; }
+function selectedShaftFilters(){
+  return Object.fromEntries(shaftFields.map(([id]) => [id, $(id)?.value ?? ALL]));
+}
+function shaftMatchesFilters(s, filters, excludeId){
+  return shaftFields.every(([id, field, getter]) => {
+    if(id === excludeId) return true;
+    const selected = filters[id];
+    return isAll(selected) || getter(s[field]) === selected;
+  });
+}
+function selectedShaftCandidates(){
+  const filters = selectedShaftFilters();
+  return shafts.filter(s => shaftMatchesFilters(s, filters));
+}
 function selectedShaft(){
-  return shafts.find(s => text(s.ClubType)===$('shaftType').value && text(s.OEM)===$('shaftBrand').value && text(s.Series)===$('shaftSeries').value && text(s.Model)===$('shaftModel').value && text(s.WeightClass)===$('shaftWeightClass').value && text(s.Flex)===$('shaftFlex').value && cleanTip(s.TipSize)===$('shaftTip').value) || null;
+  const filters = selectedShaftFilters();
+  if(Object.values(filters).some(isAll)) return null;
+  return selectedShaftCandidates()[0] || null;
 }
 function selectedHead(){
   return heads.find(h => text(h.ClubType)===$('headType').value && text(h.OEM)===$('headBrand').value && text(h.Model)===$('headModel').value && text(h.Variant)===$('headVariant').value && text(h.ReleaseYear)===$('headYear').value) || null;
@@ -164,7 +191,10 @@ function scoreShaft(s, base, head, intent){
 function rankResults(){
   const base = selectedShaft();
   const head = selectedHead();
-  if(!base) return {rows:[], warning:'Select a current shaft first.'};
+  if(!base){
+    const count = selectedShaftCandidates().length;
+    return {rows:[], warning: count ? `Select a single current shaft first. Current filters match ${count.toLocaleString()} shaft rows.` : 'Select a current shaft first.'};
+  }
   const intent = {weight:$('weightIntent').value, flex:$('flexIntent').value, torque:$('torqueIntent').value, launch:$('launchIntent').value, spin:$('spinIntent').value};
   const scored = shafts.map((s,idx)=>({s, idx, raw:scoreShaft(s,base,head,intent), group:groupKey(s)}));
   const best = new Map();
@@ -192,40 +222,38 @@ function fitSummary(s, intent){
   return parts.join(' / ');
 }
 
-function fillSelect(id, values, preferred){
+function fillSelect(id, values, preferred, includeAll=false){
   const el=$(id), prior=preferred ?? el.value;
+  const finalValues = includeAll ? [ALL, ...values.filter(v => v !== ALL)] : values;
   el.innerHTML='';
-  for(const v of values){ const opt=document.createElement('option'); opt.value=v; opt.textContent=v; el.appendChild(opt); }
-  if(values.includes(prior)) el.value=prior;
+  for(const v of finalValues){ const opt=document.createElement('option'); opt.value=v; opt.textContent=v; el.appendChild(opt); }
+  if(finalValues.includes(prior)) el.value=prior;
+  else if(includeAll) el.value=ALL;
+  else if(finalValues.length) el.value=finalValues[0];
 }
 let useDefaults = true;
 function pref(key){ return useDefaults ? defaults[key] : undefined; }
-function cascadeShaft(){
-  fillSelect(
-  'shaftType',
-  uniq(shafts.map(s=>s.ClubType))
-    .sort((a,b)=>
-      (CLUB_TYPE_ORDER[a] ?? 999) -
-      (CLUB_TYPE_ORDER[b] ?? 999)
-    ),
-  pref('shaftType')
-);
-/*  fillSelect('shaftType', uniq(shafts.map(s=>s.ClubType)), pref('shaftType')); */
-  const headHosel = cleanTip(selectedHead()?.HoselSizeDefault);
-  let pool=shafts.filter(s=>s.ClubType===$('shaftType').value);
-  fillSelect('shaftBrand', uniq(pool.map(s=>s.OEM)), pref('brand'));
-  pool=pool.filter(s=>s.OEM===$('shaftBrand').value);
-  fillSelect('shaftSeries', uniq(pool.map(s=>s.Series)), pref('series'));
-  pool=pool.filter(s=>s.Series===$('shaftSeries').value);
-  fillSelect('shaftModel', uniq(pool.map(s=>s.Model)), pref('model'));
-  pool=pool.filter(s=>s.Model===$('shaftModel').value);
-  fillSelect('shaftWeightClass', uniq(pool.map(s=>s.WeightClass)), pref('weightClass'));
-  pool=pool.filter(s=>s.WeightClass===$('shaftWeightClass').value);
-  fillSelect('shaftFlex', uniq(pool.map(s=>s.Flex)), pref('flex'));
-/*  pool=pool.filter(s=>s.Flex===$('shaftFlex').value);*/
-  pool=pool.filter(s=>text(s.Flex)===text($('shaftFlex').value));
-/*  fillSelect('shaftTip', uniq(pool.map(s=>cleanTip(s.TipSize))), headHosel || pref('tip')); */
-  fillSelect('shaftTip', uniq(pool.map(s=>cleanTip(s.TipSize))), pref('tip'));
+function shaftDefault(id){
+  const map = {shaftType:'shaftType', shaftBrand:'brand', shaftSeries:'series', shaftModel:'model', shaftWeightClass:'weightClass', shaftFlex:'flex', shaftTip:'tip'};
+  return pref(map[id]) ?? ALL;
+}
+function cascadeShaft(preferredTip){
+  const filters = selectedShaftFilters();
+  for(const [id, field, getter] of shaftFields){
+    let values = uniq(shafts.filter(s => shaftMatchesFilters(s, filters, id)).map(s => getter(s[field])));
+    if(id === 'shaftType') {
+      values = values.sort((a,b)=>
+        (CLUB_TYPE_ORDER[a] ?? 999) -
+        (CLUB_TYPE_ORDER[b] ?? 999) || String(a).localeCompare(String(b), undefined, {numeric:true})
+      );
+    }
+    const headHosel = cleanTip(selectedHead()?.HoselSizeDefault);
+    const preferred = id === 'shaftTip'
+      ? (preferredTip || (headHosel && values.includes(headHosel) ? headHosel : undefined) || shaftDefault(id))
+      : shaftDefault(id);
+    fillSelect(id, values, preferred, true);
+    filters[id] = $(id).value;
+  }
   updateCards();
 }
 function cascadeHead(){
@@ -242,7 +270,8 @@ function cascadeHead(){
 }
 function updateCards(){
   const s=selectedShaft();
-  $('selectedShaftCard').innerHTML = s ? `<b>${displayName(s)}</b><div class="chiprow"><span class="chip">${s.Material}</span><span class="chip">${num(s.Weight_g)}g</span><span class="chip">${s.Flex}</span><span class="chip">Tip ${cleanTip(s.TipSize)}</span><span class="chip">Tq ${text(s.Torque)||'—'}</span><span class="chip">L${s.LaunchNum||'—'} / S${s.SpinNum||'—'}</span></div><div class="muted">${canonicalId(s)}</div>` : 'No matching shaft.';
+  const matches = selectedShaftCandidates().length;
+  $('selectedShaftCard').innerHTML = s ? `<b>${displayName(s)}</b><div class="chiprow"><span class="chip">${s.Material}</span><span class="chip">${num(s.Weight_g)}g</span><span class="chip">${s.Flex}</span><span class="chip">Tip ${cleanTip(s.TipSize)}</span><span class="chip">Tq ${text(s.Torque)||'—'}</span><span class="chip">L${s.LaunchNum||'—'} / S${s.SpinNum||'—'}</span></div><div class="muted">${canonicalId(s)}</div>` : (matches ? `Narrow the shaft selectors to one current shaft. Matching rows: ${matches.toLocaleString()}.` : 'No matching shaft.');
   const h=selectedHead();
   $('selectedHeadCard').innerHTML = h ? `<b>${h.OEM} ${h.Model} ${h.Variant} ${h.ReleaseYear}</b><div class="chiprow"><span class="chip">${h.ModelCategory||'Category —'}</span><span class="chip">${h.Construction||'Construction —'}</span><span class="chip">Hosel ${cleanTip(h.HoselSizeDefault)}</span><span class="chip">${h.AdapterFamily||'n/a'}</span></div>` : 'No matching head.';
   if(h && document.activeElement !== $('hoselSize')) $('hoselSize').value=cleanTip(h.HoselSizeDefault);
@@ -266,21 +295,23 @@ function init(){
   ['weightIntent','flexIntent','torqueIntent','launchIntent','spinIntent'].forEach(id=>fillSelect(id,intents,defaults[id]||'Same'));
   cascadeShaft(); cascadeHead(); useDefaults = false; render();
   ['shaftType','shaftBrand','shaftSeries','shaftModel','shaftWeightClass','shaftFlex','shaftTip'].forEach(id=>$(id).addEventListener('change',()=>{
-  defaults[id.replace('shaft','').toLowerCase()] = $(id).value;
-
-  if(id === 'shaftType'){
+  if(id === 'shaftType' && !isAll($('shaftType').value)){
     $('headType').value = $('shaftType').value;
     cascadeHead();
   }
-
   cascadeShaft();
   render();
 }));
-  ['headType','headBrand','headModel','headVariant','headYear'].forEach(id=>$(id).addEventListener('change',()=>{cascadeHead(); cascadeShaft(); render();}));
+  ['headType','headBrand','headModel','headVariant','headYear'].forEach(id=>$(id).addEventListener('change',()=>{
+    cascadeHead();
+    const headHosel = cleanTip(selectedHead()?.HoselSizeDefault);
+    cascadeShaft(headHosel);
+    render();
+  }));
   ['weightIntent','flexIntent','torqueIntent','launchIntent','spinIntent','hoselSize','currentOnly','availableBoost'].forEach(id=>$(id).addEventListener('change',render));
   $('runBtn').addEventListener('click',render);
   $('resetBtn').addEventListener('click',()=>location.reload());
-  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=8.1-layout-v3').catch(()=>{});
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=8.2-all-cascade-tip').catch(()=>{});
 }
 let deferredPrompt; window.addEventListener('beforeinstallprompt',e=>{e.preventDefault(); deferredPrompt=e; $('installBtn').classList.remove('hidden');});
 $('installBtn').addEventListener('click',async()=>{ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; $('installBtn').classList.add('hidden'); }});
