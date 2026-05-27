@@ -254,66 +254,56 @@ function headFieldValue(h, id){
 function filteredRows(rows, ids, valueFn, omitId=null){
   return rows.filter(row => ids.every(id => id===omitId || isAll(id) || valueFn(row,id)===$(id).value));
 }
-const shaftHierarchy = [...shaftIds];
-const headHierarchy = [...headIds];
-
-function fieldIndex(ids, id){
-  const idx = ids.indexOf(id);
-  return idx >= 0 ? idx : -1;
-}
-
-function shouldAutoResolve(ids, id, changedId){
-  if(!changedId) return true;
-  const changedIndex = fieldIndex(ids, changedId);
-  const currentIndex = fieldIndex(ids, id);
-  if(changedIndex < 0 || currentIndex < 0) return true;
-  return currentIndex > changedIndex;
-}
-
-function resolveSelect(id, values, ids, changedId=null){
+function resolveSelect(id, values){
   const el=$(id);
   const prior=el.value;
+
+  // Always keep the explicit All option available.
   fillSelect(id, values, prior, true);
 
-  // Explicit All is a user choice, not a missing value. Preserve it.
-  if(explicitAll.has(id)) { el.value = ALL_VALUE; return; }
+  // If the user explicitly selected All, preserve that state.
+  if(explicitAll.has(id)) {
+    el.value = ALL_VALUE;
+    return;
+  }
 
-  // Preserve valid selections aggressively. This is the heart of partial state retention.
-  if(prior !== ALL_VALUE && values.includes(prior)) { el.value = prior; return; }
+  // Preserve any still-valid concrete selection.
+  if(prior !== ALL_VALUE && values.includes(prior)) {
+    el.value = prior;
+    return;
+  }
 
-  // Auto-resolve only when the available universe collapses to one option,
-  // and only in the downstream direction from the field the user changed.
-  if(values.length === 1 && shouldAutoResolve(ids, id, changedId)) {
+  // Auto-resolve only when there is exactly one possible concrete option.
+  if(values.length === 1) {
     el.value = values[0];
     setExplicitAll(id, false);
     return;
   }
 
-  // Multiple choices means the user has not made a specific choice yet.
-  // Do not force the first option.
+  // Multiple possibilities means stay at All instead of forcing the first value.
   el.value = ALL_VALUE;
   setExplicitAll(id, true);
 }
-function cascadeShaft(changedId=null){
+function cascadeShaft(){
   isCascading = true;
   try{
     for(const id of shaftIds){
       const pool = filteredRows(shafts, shaftIds, shaftFieldValue, id);
       let vals = uniq(pool.map(s => shaftFieldValue(s,id)));
       if(id==='shaftType') vals = vals.sort((a,b)=>(CLUB_TYPE_ORDER[a]??999)-(CLUB_TYPE_ORDER[b]??999));
-      resolveSelect(id, vals, shaftHierarchy, changedId);
+      resolveSelect(id, vals);
     }
     updateCards();
   } finally { isCascading = false; }
 }
-function cascadeHead(changedId=null){
+function cascadeHead(){
   isCascading = true;
   try{
     for(const id of headIds){
       const pool = filteredRows(heads, headIds, headFieldValue, id);
       let vals = uniq(pool.map(h => headFieldValue(h,id)));
       if(id==='headType') vals = vals.sort((a,b)=>(CLUB_TYPE_ORDER[a]??999)-(CLUB_TYPE_ORDER[b]??999));
-      resolveSelect(id, vals, headHierarchy, changedId);
+      resolveSelect(id, vals);
     }
     updateCards();
   } finally { isCascading = false; }
@@ -351,7 +341,7 @@ function init(){
       if($('shaftType').value === ALL_VALUE){ $('headType').value = ALL_VALUE; setExplicitAll('headType', true); }
       else { $('headType').value = $('shaftType').value; setExplicitAll('headType', false); }
     }
-    cascadeShaft(id); cascadeHead(id === 'shaftType' ? 'headType' : null); render();
+    cascadeShaft(); cascadeHead(); render();
   }));
 
   headIds.forEach(id=>$(id).addEventListener('change',()=>{
@@ -361,13 +351,13 @@ function init(){
       if($('headType').value === ALL_VALUE){ $('shaftType').value = ALL_VALUE; setExplicitAll('shaftType', true); }
       else { $('shaftType').value = $('headType').value; setExplicitAll('shaftType', false); }
     }
-    cascadeHead(id); cascadeShaft(id === 'headType' ? 'shaftType' : null); render();
+    cascadeHead(); cascadeShaft(); render();
   }));
 
   ['weightIntent','flexIntent','torqueIntent','launchIntent','spinIntent','hoselSize','currentOnly','availableBoost'].forEach(id=>$(id).addEventListener('change',render));
   $('runBtn').addEventListener('click',render);
   $('resetBtn').addEventListener('click',()=>location.reload());
-  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=8.2-selector-resolver').catch(()=>{});
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=8.2a-all-preserve').catch(()=>{});
 }
 let deferredPrompt; window.addEventListener('beforeinstallprompt',e=>{e.preventDefault(); deferredPrompt=e; $('installBtn').classList.remove('hidden');});
 $('installBtn').addEventListener('click',async()=>{ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; $('installBtn').classList.add('hidden'); }});
