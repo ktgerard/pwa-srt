@@ -3,6 +3,8 @@ const shafts = DATA.shafts;
 const heads = DATA.heads;
 const defaults = DATA.dashboardDefaults;
 const intents = ['Same','Less','More'];
+const ALL_VALUE = '__ALL__';
+const ALL_LABEL = 'All';
 const $ = id => document.getElementById(id);
 const num = v => { const n = parseFloat(String(v ?? '').replace(/[^0-9.\-]/g,'')); return Number.isFinite(n) ? n : 0; };
 const text = v => String(v ?? '').trim();
@@ -12,7 +14,6 @@ const truthy = v => ['1','y','yes','true'].includes(norm(v)) || v === true || v 
 const tipNum = v => { const n = num(v); return n > 1 ? n/1000 : n; };
 const flexNum = v => num(v);
 const cleanTip = v => { const n = tipNum(v); return n ? n.toFixed(3).replace(/^0/,'0') : ''; };
-const ALL_VALUE = '__ALL__';
 const CLUB_TYPE_ORDER = {
   Driver: 1,
   Fairway: 2,
@@ -39,6 +40,7 @@ function parseTorque(v){
 
 function compatibleClub(inputClub, shaftClub){
   const i = text(inputClub), s = text(shaftClub);
+  if(!i || i === ALL_VALUE) return true;
   if((i === 'Driver' || i === 'Fairway') && !(s === 'Wood' || s === 'Woods')) return false;
   if(i === 'Hybrid' && s !== 'Hybrid') return false;
   if(i === 'Iron' && s !== 'Iron') return false;
@@ -126,7 +128,7 @@ function selectedHead(){
 }
 
 function scoreShaft(s, base, head, intent){
-  const inputClub = ($('headType').value && $('headType').value!==ALL_VALUE ? $('headType').value : ($('shaftType').value!==ALL_VALUE ? $('shaftType').value : text(base.ClubType)));
+  const inputClub = $('headType').value !== ALL_VALUE ? $('headType').value : ($('shaftType').value !== ALL_VALUE ? $('shaftType').value : '');
   if(!compatibleClub(inputClub, s.ClubType)) return -999;
   if($('currentOnly').checked && !currentFlag(s)) return -999;
   const d = num(s.Weight_g), baseW = num(base.Weight_g);
@@ -189,7 +191,7 @@ function rankResults(){
   for(const r of scored){
     if(r.raw === best.get(r.group) && !seen.has(r.group)){
       let prod = r.raw;
-      if(isTaperSetRow(r.s) && ($('headType').value === 'Iron' || ($('headType').value===ALL_VALUE && $('shaftType').value==='Iron'))) prod += 12;
+      if(isTaperSetRow(r.s) && $('headType').value === 'Iron') prod += 12;
       winners.push({...r, prod}); seen.add(r.group);
     }
   }
@@ -207,141 +209,84 @@ function fitSummary(s, intent){
   return parts.join(' / ');
 }
 
-function fillSelect(id, values, preferred, includeAll=false){
+function fillSelect(id, values, preferred, includeAll=true){
   const el=$(id), prior=preferred ?? el.value;
   el.innerHTML='';
   if(includeAll){
     const opt=document.createElement('option');
-    opt.value=ALL_VALUE;
-    opt.textContent='All';
-    el.appendChild(opt);
+    opt.value=ALL_VALUE; opt.textContent=ALL_LABEL; el.appendChild(opt);
   }
   for(const v of values){
-    const opt=document.createElement('option');
-    opt.value=v;
-    opt.textContent=v;
-    el.appendChild(opt);
+    const opt=document.createElement('option'); opt.value=v; opt.textContent=v; el.appendChild(opt);
   }
-  const allowed = includeAll ? [ALL_VALUE, ...values] : values;
-  if(allowed.includes(prior)) el.value=prior;
-  else if(allowed.length) el.value=allowed[0];
+  if(prior === ALL_VALUE && includeAll) el.value = ALL_VALUE;
+  else if(values.includes(prior)) el.value = prior;
+  else if(includeAll) el.value = ALL_VALUE;
+  else if(values.length) el.value = values[0];
 }
-let useDefaults = true;
+
+let useDefaults = false;
+const shaftIds = ['shaftType','shaftBrand','shaftSeries','shaftModel','shaftWeightClass','shaftFlex','shaftTip'];
+const headIds = ['headType','headBrand','headModel','headVariant','headYear'];
+const explicitAll = new Set([...shaftIds, ...headIds]);
+let isCascading = false;
 function pref(key){ return undefined; }
-function optValue(row, field){ return field.clean ? field.clean(row[field.prop]) : text(row[field.prop]); }
-function optionValues(rows, field){ return uniq(rows.map(r=>optValue(r, field))).sort(field.sort || undefined); }
-function rowMatches(row, field, value){ return value===ALL_VALUE || value==='' || optValue(row, field)===value; }
-
-function solveCascade(records, fields, changedId, defaultPrefs={}, preferredByField={}){
-  const current = Object.fromEntries(fields.map(f=>[f.id, $(f.id).value || ALL_VALUE]));
-
-  // Only concrete selector values are constraints. Selecting All removes that constraint.
-  let constraints = {};
-  fields.forEach(f=>{
-    const v = current[f.id];
-    if(v && v !== ALL_VALUE) constraints[f.id] = v;
-  });
-
-  // On first load, start in discovery mode: every selector is All.
-  // Defaults are intentionally ignored for the cascading selectors.
-  const hasConcrete = Object.keys(constraints).length > 0;
-
-  let targetRows = hasConcrete
-    ? records.filter(r=>fields.every(f=>!constraints[f.id] || rowMatches(r,f,constraints[f.id])))
-    : [...records];
-
-  // If a newly selected value conflicts with other stale constraints, keep the newly changed
-  // field and rebuild the rest from that value. This is what makes picking Model=AXIOM 105
-  // backfill Iron / Fujikura / AXIOM instead of getting trapped by old selector state.
-  if(!targetRows.length && changedId && current[changedId] && current[changedId] !== ALL_VALUE){
-    const cf = fields.find(f=>f.id===changedId);
-    constraints = {[changedId]: current[changedId]};
-    targetRows = records.filter(r=>rowMatches(r, cf, current[changedId]));
-  }
-
-  if(!hasConcrete && !Object.keys(constraints).length){
-    fields.forEach(f=>fillSelect(f.id, optionValues(records, f), ALL_VALUE, true));
-    return;
-  }
-
-  if(!targetRows.length) targetRows = [...records];
-
-  // A representative row restores the pre-All behavior once the user supplies any concrete
-  // value: upstream single values backfill, downstream multi-value choices choose the first
-  // valid option instead of staying at All.
-  const representative = targetRows[0] || records[0];
-
-  fields.forEach(f=>{
-    let optionRows = records.filter(r=>fields.every(other=>{
-      if(other.id===f.id) return true;
-      const v = constraints[other.id];
-      return !v || rowMatches(r, other, v);
-    }));
-    if(!optionRows.length) optionRows = targetRows;
-    const values = optionValues(optionRows, f);
-    const targetValues = optionValues(targetRows, f);
-
-    let preferred;
-
-    if(constraints[f.id] && values.includes(constraints[f.id])){
-      preferred = constraints[f.id];
-    } else if(preferredByField[f.id] && values.includes(preferredByField[f.id])){
-      preferred = preferredByField[f.id];
-    } else if(targetValues.length === 1){
-      preferred = targetValues[0];
-    } else if(representative){
-      preferred = optValue(representative, f);
-    } else {
-      preferred = values[0] ?? ALL_VALUE;
+function setExplicitAll(id, yes=true){ if(yes) explicitAll.add(id); else explicitAll.delete(id); }
+function isAll(id){ return $(id).value === ALL_VALUE || explicitAll.has(id); }
+function shaftFieldValue(s, id){
+  if(id==='shaftType') return text(s.ClubType);
+  if(id==='shaftBrand') return text(s.OEM);
+  if(id==='shaftSeries') return text(s.Series);
+  if(id==='shaftModel') return text(s.Model);
+  if(id==='shaftWeightClass') return text(s.WeightClass);
+  if(id==='shaftFlex') return text(s.Flex);
+  if(id==='shaftTip') return cleanTip(s.TipSize);
+  return '';
+}
+function headFieldValue(h, id){
+  if(id==='headType') return text(h.ClubType);
+  if(id==='headBrand') return text(h.OEM);
+  if(id==='headModel') return text(h.Model);
+  if(id==='headVariant') return text(h.Variant);
+  if(id==='headYear') return text(h.ReleaseYear);
+  return '';
+}
+function filteredRows(rows, ids, valueFn, omitId=null){
+  return rows.filter(row => ids.every(id => id===omitId || isAll(id) || valueFn(row,id)===$(id).value));
+}
+function resolveSelect(id, values){
+  const el=$(id);
+  const prior=el.value;
+  fillSelect(id, values, prior, true);
+  if(explicitAll.has(id)) { el.value = ALL_VALUE; return; }
+  if(values.includes(prior)) { el.value = prior; return; }
+  if(values.length === 1) { el.value = values[0]; return; }
+  if(values.length > 1) { el.value = values[0]; return; }
+  el.value = ALL_VALUE;
+}
+function cascadeShaft(){
+  isCascading = true;
+  try{
+    for(const id of shaftIds){
+      const pool = filteredRows(shafts, shaftIds, shaftFieldValue, id);
+      let vals = uniq(pool.map(s => shaftFieldValue(s,id)));
+      if(id==='shaftType') vals = vals.sort((a,b)=>(CLUB_TYPE_ORDER[a]??999)-(CLUB_TYPE_ORDER[b]??999));
+      resolveSelect(id, vals);
     }
-
-    fillSelect(f.id, values, preferred, true);
-
-    const selected = $(f.id).value;
-    if(selected && selected !== ALL_VALUE) constraints[f.id] = selected;
-    else delete constraints[f.id];
-  });
+    updateCards();
+  } finally { isCascading = false; }
 }
-function cascadeShaft(changedId){
-  const shaftFields = [
-    {id:'shaftType', prop:'ClubType', sort:(a,b)=>(CLUB_TYPE_ORDER[a] ?? 999)-(CLUB_TYPE_ORDER[b] ?? 999)},
-    {id:'shaftBrand', prop:'OEM'},
-    {id:'shaftSeries', prop:'Series'},
-    {id:'shaftModel', prop:'Model'},
-    {id:'shaftWeightClass', prop:'WeightClass'},
-    {id:'shaftFlex', prop:'Flex'},
-    {id:'shaftTip', prop:'TipSize', clean:cleanTip}
-  ];
-  const headHosel = cleanTip(selectedHead()?.HoselSizeDefault);
-  const tipValues = optionValues(shafts, shaftFields[6]);
-  const preferredTip = headHosel && tipValues.includes(headHosel) ? headHosel : undefined;
-  solveCascade(shafts, shaftFields, changedId, {
-    shaftType: pref('shaftType'),
-    shaftBrand: pref('brand'),
-    shaftSeries: pref('series'),
-    shaftModel: pref('model'),
-    shaftWeightClass: pref('weightClass'),
-    shaftFlex: pref('flex'),
-    shaftTip: pref('tip')
-  }, preferredTip ? {shaftTip: preferredTip} : {});
-  updateCards();
-}
-function cascadeHead(changedId){
-  const headFields = [
-    {id:'headType', prop:'ClubType', sort:(a,b)=>(CLUB_TYPE_ORDER[a] ?? 999)-(CLUB_TYPE_ORDER[b] ?? 999)},
-    {id:'headBrand', prop:'OEM'},
-    {id:'headModel', prop:'Model'},
-    {id:'headVariant', prop:'Variant'},
-    {id:'headYear', prop:'ReleaseYear'}
-  ];
-  solveCascade(heads, headFields, changedId, {
-    headType: pref('headClubType'),
-    headBrand: pref('headBrand'),
-    headModel: pref('headModel'),
-    headVariant: pref('headVariant'),
-    headYear: pref('headYear')
-  });
-  updateCards();
+function cascadeHead(){
+  isCascading = true;
+  try{
+    for(const id of headIds){
+      const pool = filteredRows(heads, headIds, headFieldValue, id);
+      let vals = uniq(pool.map(h => headFieldValue(h,id)));
+      if(id==='headType') vals = vals.sort((a,b)=>(CLUB_TYPE_ORDER[a]??999)-(CLUB_TYPE_ORDER[b]??999));
+      resolveSelect(id, vals);
+    }
+    updateCards();
+  } finally { isCascading = false; }
 }
 function updateCards(){
   const s=selectedShaft();
@@ -366,32 +311,33 @@ function render(){
   });
 }
 function init(){
-  ['weightIntent','flexIntent','torqueIntent','launchIntent','spinIntent'].forEach(id=>fillSelect(id,intents,defaults[id]||'Same'));
-  useDefaults = false; cascadeShaft(); cascadeHead(); render();
-  ['shaftType','shaftBrand','shaftSeries','shaftModel','shaftWeightClass','shaftFlex','shaftTip'].forEach(id=>$(id).addEventListener('change',()=>{
-    defaults[id.replace('shaft','').toLowerCase()] = $(id).value;
+  ['weightIntent','flexIntent','torqueIntent','launchIntent','spinIntent'].forEach(id=>fillSelect(id,intents,defaults[id]||'Same',false));
+  cascadeShaft(); cascadeHead(); render();
 
+  shaftIds.forEach(id=>$(id).addEventListener('change',()=>{
+    if(isCascading) return;
+    if($(id).value === ALL_VALUE) setExplicitAll(id,true); else setExplicitAll(id,false);
     if(id === 'shaftType'){
-      $('headType').value = $('shaftType').value;
-      cascadeHead('headType');
+      if($('shaftType').value === ALL_VALUE){ $('headType').value = ALL_VALUE; setExplicitAll('headType', true); }
+      else { $('headType').value = $('shaftType').value; setExplicitAll('headType', false); }
     }
+    cascadeShaft(); cascadeHead(); render();
+  }));
 
-    cascadeShaft(id);
-    render();
-  }));
-  ['headType','headBrand','headModel','headVariant','headYear'].forEach(id=>$(id).addEventListener('change',()=>{
+  headIds.forEach(id=>$(id).addEventListener('change',()=>{
+    if(isCascading) return;
+    if($(id).value === ALL_VALUE) setExplicitAll(id,true); else setExplicitAll(id,false);
     if(id === 'headType'){
-      $('shaftType').value = $('headType').value;
-      cascadeShaft('shaftType');
+      if($('headType').value === ALL_VALUE){ $('shaftType').value = ALL_VALUE; setExplicitAll('shaftType', true); }
+      else { $('shaftType').value = $('headType').value; setExplicitAll('shaftType', false); }
     }
-    cascadeHead(id);
-    cascadeShaft();
-    render();
+    cascadeHead(); cascadeShaft(); render();
   }));
+
   ['weightIntent','flexIntent','torqueIntent','launchIntent','spinIntent','hoselSize','currentOnly','availableBoost'].forEach(id=>$(id).addEventListener('change',render));
   $('runBtn').addEventListener('click',render);
   $('resetBtn').addEventListener('click',()=>location.reload());
-  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=8.1-all-cascade-v3').catch(()=>{});
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=8.1-all-cascade-release').catch(()=>{});
 }
 let deferredPrompt; window.addEventListener('beforeinstallprompt',e=>{e.preventDefault(); deferredPrompt=e; $('installBtn').classList.remove('hidden');});
 $('installBtn').addEventListener('click',async()=>{ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; $('installBtn').classList.add('hidden'); }});
