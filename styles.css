@@ -272,3 +272,7 @@
   }
 }
 
+select,
+select option {
+  font-weight: 400;
+}
