@@ -254,36 +254,66 @@ function headFieldValue(h, id){
 function filteredRows(rows, ids, valueFn, omitId=null){
   return rows.filter(row => ids.every(id => id===omitId || isAll(id) || valueFn(row,id)===$(id).value));
 }
-function resolveSelect(id, values){
+const shaftHierarchy = [...shaftIds];
+const headHierarchy = [...headIds];
+
+function fieldIndex(ids, id){
+  const idx = ids.indexOf(id);
+  return idx >= 0 ? idx : -1;
+}
+
+function shouldAutoResolve(ids, id, changedId){
+  if(!changedId) return true;
+  const changedIndex = fieldIndex(ids, changedId);
+  const currentIndex = fieldIndex(ids, id);
+  if(changedIndex < 0 || currentIndex < 0) return true;
+  return currentIndex > changedIndex;
+}
+
+function resolveSelect(id, values, ids, changedId=null){
   const el=$(id);
   const prior=el.value;
   fillSelect(id, values, prior, true);
+
+  // Explicit All is a user choice, not a missing value. Preserve it.
   if(explicitAll.has(id)) { el.value = ALL_VALUE; return; }
-  if(values.includes(prior)) { el.value = prior; return; }
-  if(values.length === 1) { el.value = values[0]; return; }
-  if(values.length > 1) { el.value = values[0]; return; }
+
+  // Preserve valid selections aggressively. This is the heart of partial state retention.
+  if(prior !== ALL_VALUE && values.includes(prior)) { el.value = prior; return; }
+
+  // Auto-resolve only when the available universe collapses to one option,
+  // and only in the downstream direction from the field the user changed.
+  if(values.length === 1 && shouldAutoResolve(ids, id, changedId)) {
+    el.value = values[0];
+    setExplicitAll(id, false);
+    return;
+  }
+
+  // Multiple choices means the user has not made a specific choice yet.
+  // Do not force the first option.
   el.value = ALL_VALUE;
+  setExplicitAll(id, true);
 }
-function cascadeShaft(){
+function cascadeShaft(changedId=null){
   isCascading = true;
   try{
     for(const id of shaftIds){
       const pool = filteredRows(shafts, shaftIds, shaftFieldValue, id);
       let vals = uniq(pool.map(s => shaftFieldValue(s,id)));
       if(id==='shaftType') vals = vals.sort((a,b)=>(CLUB_TYPE_ORDER[a]??999)-(CLUB_TYPE_ORDER[b]??999));
-      resolveSelect(id, vals);
+      resolveSelect(id, vals, shaftHierarchy, changedId);
     }
     updateCards();
   } finally { isCascading = false; }
 }
-function cascadeHead(){
+function cascadeHead(changedId=null){
   isCascading = true;
   try{
     for(const id of headIds){
       const pool = filteredRows(heads, headIds, headFieldValue, id);
       let vals = uniq(pool.map(h => headFieldValue(h,id)));
       if(id==='headType') vals = vals.sort((a,b)=>(CLUB_TYPE_ORDER[a]??999)-(CLUB_TYPE_ORDER[b]??999));
-      resolveSelect(id, vals);
+      resolveSelect(id, vals, headHierarchy, changedId);
     }
     updateCards();
   } finally { isCascading = false; }
@@ -321,7 +351,7 @@ function init(){
       if($('shaftType').value === ALL_VALUE){ $('headType').value = ALL_VALUE; setExplicitAll('headType', true); }
       else { $('headType').value = $('shaftType').value; setExplicitAll('headType', false); }
     }
-    cascadeShaft(); cascadeHead(); render();
+    cascadeShaft(id); cascadeHead(id === 'shaftType' ? 'headType' : null); render();
   }));
 
   headIds.forEach(id=>$(id).addEventListener('change',()=>{
@@ -331,13 +361,13 @@ function init(){
       if($('headType').value === ALL_VALUE){ $('shaftType').value = ALL_VALUE; setExplicitAll('shaftType', true); }
       else { $('shaftType').value = $('headType').value; setExplicitAll('shaftType', false); }
     }
-    cascadeHead(); cascadeShaft(); render();
+    cascadeHead(id); cascadeShaft(id === 'headType' ? 'shaftType' : null); render();
   }));
 
   ['weightIntent','flexIntent','torqueIntent','launchIntent','spinIntent','hoselSize','currentOnly','availableBoost'].forEach(id=>$(id).addEventListener('change',render));
   $('runBtn').addEventListener('click',render);
   $('resetBtn').addEventListener('click',()=>location.reload());
-  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=8.1-all-cascade-release').catch(()=>{});
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=8.2-selector-resolver').catch(()=>{});
 }
 let deferredPrompt; window.addEventListener('beforeinstallprompt',e=>{e.preventDefault(); deferredPrompt=e; $('installBtn').classList.remove('hidden');});
 $('installBtn').addEventListener('click',async()=>{ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; $('installBtn').classList.add('hidden'); }});
