@@ -123,8 +123,7 @@ function selectedHead(){
     ($('headBrand').value===ALL_VALUE || text(h.OEM)===$('headBrand').value) &&
     ($('headModel').value===ALL_VALUE || text(h.Model)===$('headModel').value) &&
     ($('headVariant').value===ALL_VALUE || text(h.Variant)===$('headVariant').value) &&
-    ($('headYear').value===ALL_VALUE || text(h.ReleaseYear)===$('headYear').value) &&
-    ($('headHoselSize').value===ALL_VALUE || text(h.HoselSizeDefault)===$('headHoselSize').value)
+    ($('headYear').value===ALL_VALUE || text(h.ReleaseYear)===$('headYear').value)
   ) || null;
 }
 
@@ -250,7 +249,6 @@ function headFieldValue(h, id){
   if(id==='headModel') return text(h.Model);
   if(id==='headVariant') return text(h.Variant);
   if(id==='headYear') return text(h.ReleaseYear);
-  if(id==='headHoselSize') return text(h.HoselSizeDefault);
   return '';
 }
 function filteredRows(rows, ids, valueFn, omitId=null){
