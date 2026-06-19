@@ -229550,7 +229550,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2015|C300|||IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "C300",
       "ModelCode": "C300",
@@ -229587,7 +229587,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2015|FG TOUR F5|||IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "FG Tour F5",
       "ModelCode": "FGRF5",
@@ -229624,7 +229624,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2015|FG TOUR M3|||IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "FG Tour M3",
       "ModelCode": "FGTM3",
@@ -229661,7 +229661,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2016|C300 FORGED|||IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "C300 Forged",
       "ModelCode": "C300FRG",
@@ -229698,7 +229698,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2017|D7|||DRIVER",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "D7",
       "ModelCode": "D7",
@@ -229735,7 +229735,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2017|D7|||FAIRWAY",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "D7",
       "ModelCode": "D7",
@@ -229772,7 +229772,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2017|D7|||HYBRID",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "D7",
       "ModelCode": "D7",
@@ -229809,7 +229809,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2017|D7|||IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "D7",
       "ModelCode": "D7",
@@ -229846,7 +229846,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2017|D7||FORGED|IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "D7",
       "ModelCode": "D7",
@@ -229883,7 +229883,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2018|FG TOUR V6|||WEDGE",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "FG Tour V6",
       "ModelCode": "FGV6",
@@ -229920,7 +229920,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2018|STAFF MODEL||BLADE|IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Staff Model",
       "ModelCode": "STAFFMDL",
@@ -229957,7 +229957,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2018|STAFF MODEL||CB|IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Staff Model",
       "ModelCode": "STAFFMDL",
@@ -229994,7 +229994,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2020|D9|||DRIVER",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "D9",
       "ModelCode": "D9",
@@ -230031,7 +230031,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2020|D9|||FAIRWAY",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "D9",
       "ModelCode": "D9",
@@ -230068,7 +230068,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2020|D9|||HYBRID",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "D9",
       "ModelCode": "D9",
@@ -230105,7 +230105,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2020|LAUNCH PAD|||IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Launch Pad",
       "ModelCode": "LNCHPD",
@@ -230142,7 +230142,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2021|D9|||IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "D9",
       "ModelCode": "D9",
@@ -230179,7 +230179,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2021|D9||FORGED|IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "D9",
       "ModelCode": "D9",
@@ -230216,7 +230216,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2022|LAUNCH PAD 2|||IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Launch Pad 2",
       "ModelCode": "LNCHPD2",
@@ -230253,7 +230253,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2022|STAFF MODEL||BLADE|IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Staff Model",
       "ModelCode": "STAFFMDL",
@@ -230290,7 +230290,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2022|STAFF MODEL||CB|IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Staff Model",
       "ModelCode": "STAFFMDL",
@@ -230327,7 +230327,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2023|DYNAPOWER|||FAIRWAY",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Dynapower",
       "ModelCode": "DYNAPWR",
@@ -230364,7 +230364,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2023|DYNAPOWER|||HYBRID",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Dynapower",
       "ModelCode": "DYNAPWR",
@@ -230401,7 +230401,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2023|DYNAPOWER|||IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Dynapower",
       "ModelCode": "DYNAPWR",
@@ -230438,7 +230438,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2023|DYNAPOWER||CARBON|DRIVER",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Dynapower",
       "ModelCode": "DYNAPWR",
@@ -230475,7 +230475,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2023|DYNAPOWER||FORGED|IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Dynapower",
       "ModelCode": "DYNAPWR",
@@ -230512,7 +230512,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2023|DYNAPOWER||TITANIUM|DRIVER",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Dynapower",
       "ModelCode": "DYNAPWR",
@@ -230549,7 +230549,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2024|DYNAPOWER||FORGED CB|IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Dynapower",
       "ModelCode": "DYNAPWR",
@@ -230586,7 +230586,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2025|DYNAPWR|||FAIRWAY",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Dynapwr",
       "ModelCode": "DYNAPWR25",
@@ -230623,7 +230623,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2025|DYNAPWR|||HYBRID",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Dynapwr",
       "ModelCode": "DYNAPWR25",
@@ -230660,7 +230660,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2025|DYNAPWR|||IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Dynapwr",
       "ModelCode": "DYNAPWR25",
@@ -230697,7 +230697,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2025|DYNAPWR||LS|DRIVER",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Dynapwr",
       "ModelCode": "DYNAPWR25",
@@ -230734,7 +230734,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2025|DYNAPWR||MAX PLUS|DRIVER",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Dynapwr",
       "ModelCode": "DYNAPWR25",
@@ -230771,7 +230771,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2025|DYNAPWR||MAX|DRIVER",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Dynapwr",
       "ModelCode": "DYNAPWR25",
@@ -230808,7 +230808,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2025|DYNAPWR||MAX|IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Dynapwr",
       "ModelCode": "DYNAPWR25",
@@ -230845,7 +230845,7 @@ window.FIS_DATA = {
     },
     {
       "HeadID": "WIL|2025|STAFF XB|||IRON",
-      "OEM": "Wilson Staff",
+      "OEM": "Wilson",
       "OEMCode": "WIL",
       "Model": "Staff XB",
       "ModelCode": "STAFFXB",
