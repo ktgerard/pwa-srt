@@ -6,6 +6,7 @@ const intents = ['Same','Less','More'];
 const ALL_VALUE = '__ALL__';
 const ALL_LABEL = 'All';
 const $ = id => document.getElementById(id);
+let linkedHeadId = new URLSearchParams(location.search).get('headId') || '';
 const num = v => { const n = parseFloat(String(v ?? '').replace(/[^0-9.\-]/g,'')); return Number.isFinite(n) ? n : 0; };
 const text = v => String(v ?? '').trim();
 const norm = v => text(v).toLowerCase();
@@ -118,6 +119,7 @@ function selectedShaft(){
   ) || null;
 }
 function selectedHead(){
+  if(linkedHeadId){ const exact=heads.find(h=>text(h.HeadID)===linkedHeadId); if(exact) return exact; }
   return heads.find(h =>
     ($('headType').value===ALL_VALUE || text(h.ClubType)===$('headType').value) &&
     ($('headBrand').value===ALL_VALUE || text(h.OEM)===$('headBrand').value) &&
@@ -330,9 +332,34 @@ function render(){
     tbody.appendChild(tr);
   });
 }
+
+function applyDeepLinkContext(){
+  const q=new URLSearchParams(location.search); const headId=q.get('headId'); const familyId=q.get('shaftFamilyId'); const material=q.get('material')||'';
+  if(!headId && !familyId) return;
+  const ctx=$('deepLinkContext'); const h=headId?heads.find(x=>text(x.HeadID)===headId):null;
+  if(h){
+    const map={headType:text(h.ClubType),headBrand:text(h.OEM),headModel:text(h.Model),headVariant:text(h.Variant),headYear:text(h.ReleaseYear)};
+    for(const [id,v] of Object.entries(map)){ if(v){$(id).value=v;setExplicitAll(id,false);} }
+    if(text(h.ClubType)){ $('shaftType').value=text(h.ClubType); setExplicitAll('shaftType',false); }
+    cascadeHead(); cascadeShaft();
+  }
+  const fr=familyId?shafts.filter(x=>text(x.FamilyID)===familyId && (!material||material==='Unknown'||text(x.Material)===material)):[];
+  if(fr.length){
+    const r=fr[0]; const map={shaftType:text(r.ClubType),shaftBrand:text(r.OEM),shaftSeries:text(r.Series),shaftModel:text(r.Model)};
+    for(const [id,v] of Object.entries(map)){if(v){$(id).value=v;setExplicitAll(id,false);}}
+    for(const id of ['shaftWeightClass','shaftFlex','shaftTip']){ $(id).value=ALL_VALUE; setExplicitAll(id,true); }
+    cascadeShaft();
+  }
+  const headLabel=h?[h.OEM,h.Model,(h.Variant&&h.Variant!=='Standard'?h.Variant:''),h.ReleaseYear].filter(Boolean).join(' '):(headId||'Head context unavailable');
+  const familyLabel=familyId||'No shaft family supplied';
+  ctx.innerHTML=`<b>OEM Reference context:</b> ${headLabel} • ${familyLabel}${material?` • ${material}`:''}${familyId&&!fr.length?' • Reference family has no detailed ShaftDB record; select a current shaft to establish a comparison baseline.':''}`;
+  ctx.classList.remove('hidden'); updateCards(); render();
+}
+
 function init(){
   ['weightIntent','flexIntent','torqueIntent','launchIntent','spinIntent'].forEach(id=>fillSelect(id,intents,defaults[id]||'Same',false));
   cascadeShaft(); cascadeHead(); render();
+  applyDeepLinkContext();
 
   shaftIds.forEach(id=>$(id).addEventListener('change',()=>{
     if(isCascading) return;
@@ -346,6 +373,7 @@ function init(){
 
   headIds.forEach(id=>$(id).addEventListener('change',()=>{
     if(isCascading) return;
+    linkedHeadId = '';
     if($(id).value === ALL_VALUE) setExplicitAll(id,true); else setExplicitAll(id,false);
     if(id === 'headType'){
       if($('headType').value === ALL_VALUE){ $('shaftType').value = ALL_VALUE; setExplicitAll('shaftType', true); }

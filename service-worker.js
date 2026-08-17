@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fis-shaft-rec-layout-v3';
+const CACHE_NAME = 'fis-srt-phase2b-deeplink-v1';
 const APP_SHELL = [
   './',
   './index.html',
