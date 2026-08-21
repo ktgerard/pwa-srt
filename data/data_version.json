@@ -1,8 +1,8 @@
 {
-  "version": "v1.9.7",
-  "phase": "2B",
+  "version": "v1.9.6 / Phase 2B",
+  "sourceWorkbook": "Latest uploaded SRT v1.9.6 baseline",
+  "sourceHeadWorkbook": "Latest uploaded CRG baseline",
   "shaftRows": 2905,
   "headRows": 916,
-  "sourceWorkbook": "Shaft_Recommendation_Tool_v1.9.7.xlsm",
-  "generatedAt": "2026-08-16 20:43:04"
+  "generatedAt": "2026-08-15"
 }
