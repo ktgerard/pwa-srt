@@ -334,7 +334,7 @@ function render(){
 }
 
 function applyDeepLinkContext(){
-  const q=new URLSearchParams(location.search); const headId=q.get('headId'); const familyId=q.get('shaftFamilyId'); const material=q.get('material')||'';
+  const q=new URLSearchParams(location.search); const headId=q.get('headId'); const familyId=q.get('shaftFamilyId'); const oemFamilyId=q.get('oemShaftFamilyId')||''; const material=q.get('material')||'';
   if(!headId && !familyId) return;
   const ctx=$('deepLinkContext'); const h=headId?heads.find(x=>text(x.HeadID)===headId):null;
   if(h){
@@ -352,7 +352,8 @@ function applyDeepLinkContext(){
   }
   const headLabel=h?[h.OEM,h.Model,(h.Variant&&h.Variant!=='Standard'?h.Variant:''),h.ReleaseYear].filter(Boolean).join(' '):(headId||'Head context unavailable');
   const familyLabel=familyId||'No shaft family supplied';
-  ctx.innerHTML=`<b>OEM Reference context:</b> ${headLabel} • ${familyLabel}${material?` • ${material}`:''}${familyId&&!fr.length?' • Reference family has no detailed ShaftDB record; select a current shaft to establish a comparison baseline.':''}`;
+  const aliasLabel=oemFamilyId&&oemFamilyId!==familyId?` • OEM family: ${oemFamilyId} → ShaftDB family: ${familyLabel}`:` • ${familyLabel}`;
+  ctx.innerHTML=`<b>OEM Reference context:</b> ${headLabel}${aliasLabel}${material?` • ${material}`:''}${familyId&&!fr.length?' • Reference family has no detailed ShaftDB record; select a current shaft to establish a comparison baseline.':''}`;
   ctx.classList.remove('hidden'); updateCards(); render();
 }
 

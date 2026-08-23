@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fis-srt-phase2b-deeplink-v1';
+const CACHE_NAME = 'fis-srt-phase2b-deeplink-v3';
 const APP_SHELL = [
   './',
   './index.html',
