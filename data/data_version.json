@@ -1,8 +1,10 @@
 {
-  "version": "v1.9.6 / Phase 2B",
-  "sourceWorkbook": "Latest uploaded SRT v1.9.6 baseline",
-  "sourceHeadWorkbook": "Latest uploaded CRG baseline",
-  "shaftRows": 2905,
-  "headRows": 916,
-  "generatedAt": "2026-08-15"
+  "version": "Phase 2C DB Snapshot",
+  "sourceWorkbook": "Supabase FIS Data Manager",
+  "sourceHeadWorkbook": "Supabase FIS Data Manager",
+  "shaftRows": 2882,
+  "headRows": 975,
+  "generatedAt": "2026-09-11",
+  "generatedAtUtc": "2026-09-11T15:29:03.366Z",
+  "phase": "2C SRT Database Snapshot"
 }
