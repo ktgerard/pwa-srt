@@ -1,5 +1,5 @@
 FIS SRT Snapshot
-Generated: 2026-09-16T02:29:03.530Z
+Generated: 2026-09-24T12:19:29.808Z
 
 IMPORTANT: The deployed SRT currently loads data.js at runtime.
 Replacing shaft_data.json by itself will NOT update the SRT.
@@ -10,7 +10,7 @@ Deploy these files:
   data/head_data.json             -> SRT data folder
   data/data_version.json          -> SRT data folder
 
-Shaft rows: 2898
+Shaft rows: 3191
 Operational head rows: 975
 
 The JSON files mirror the embedded arrays in data.js.

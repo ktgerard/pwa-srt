@@ -2,9 +2,9 @@
   "version": "Phase 2C DB Snapshot",
   "sourceWorkbook": "Supabase FIS Data Manager",
   "sourceHeadWorkbook": "Supabase FIS Data Manager",
-  "shaftRows": 2898,
+  "shaftRows": 3191,
   "headRows": 975,
-  "generatedAt": "2026-09-16",
-  "generatedAtUtc": "2026-09-16T02:29:03.530Z",
+  "generatedAt": "2026-09-24",
+  "generatedAtUtc": "2026-09-24T12:19:29.808Z",
   "phase": "2C SRT Database Snapshot"
 }
